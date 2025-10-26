@@ -1,40 +1,24 @@
-{
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "elderscape-llm-chat",
-  "main": "src/index.ts",
-  "compatibility_date": "2025-10-26",
-  "compatibility_flags": [
-    "nodejs_compat",
-    "global_fetch_strictly_public"
-  ],
-  "assets": {
-    "binding": "ASSETS",
-    "directory": "./public"
-  },
-  "observability": {
-    "enabled": true
-  },
-  "ai": {
-    "binding": "AI"
-  },
-  "ai_endpoints": [
-    {
-      "binding": "TEXT_TO_IMAGE",
-      "model": "@cf/stable-diffusion-v1.5",
-      "max_tokens": 2048
-    }
-  ],
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "elderscape-d1"
-    }
-  ],
-  "kv_namespaces": [
-    {
-      "binding": "AI_MEMORY",
-      "id": "8c5a2eb8be934b078487ae615c0de92e"
-    }
-  ],
-  "upload_source_maps": true
-}
+name = "elderscape"
+main = "src/index.ts"
+compatibility_date = "2025-10-01"
+
+[dev]
+local_protocol = "http"
+
+[site]
+bucket = "./public"
+entry-point = "workers-site"
+
+[vars]
+HF_API_TOKEN = "<your-hf-api-token>"
+
+[[kv_namespaces]]
+binding = "AI_MEMORY"
+id = "<your-kv-namespace-id>"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "elderscape-db"
+
+[triggers]
+crons = ["0 0 * * *"]
