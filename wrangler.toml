@@ -1,24 +1,33 @@
 name = "elderscape"
 main = "src/index.ts"
-compatibility_date = "2025-10-01"
+compatibility_date = "2025-04-01"
+type = "javascript"
 
-[dev]
-local_protocol = "http"
+[compatibility_flags]
+flags = ["nodejs_compat", "global_fetch_strictly_public"]
 
-[site]
-bucket = "./public"
-entry-point = "workers-site"
+# Static assets
+[assets]
+binding = "ASSETS"
+directory = "./public"
 
-[vars]
-HF_API_TOKEN = "<your-hf-api-token>"
-
-[[kv_namespaces]]
-binding = "AI_MEMORY"
-id = "<your-kv-namespace-id>"
-
+# D1 database
 [[d1_databases]]
 binding = "DB"
 database_name = "elderscape-db"
 
-[triggers]
-crons = ["0 0 * * *"]
+# KV for AI memory
+[[kv_namespaces]]
+binding = "AI_MEMORY"
+id = "8c5a2eb8be934b078487ae615c0de92e"
+
+# Cloudflare AI binding
+[ai]
+binding = "AI"
+
+# Optional endpoints
+[[ai_endpoints]]
+binding = "HUGGINGFACE_GPT2"
+model = "@cf/huggingface/gpt2"
+
+upload_source_maps = true
