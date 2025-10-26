@@ -8,13 +8,14 @@
 </head>
 <body>
   <div id="rsmv_app"></div>
+
   <script>
-    // Initialize webviewer
+    // Initialize your webviewer
     if (window.RSMV) {
       const root = RSMV.start(document.getElementById("rsmv_app"));
     }
 
-    // Example AI chat call
+    // AI chat example
     async function sendMessage(msg) {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -25,6 +26,7 @@
       console.log("AI reply:", data.reply);
     }
 
+    // Example call
     sendMessage("Hello ElderScape AI!");
   </script>
 </body>
