@@ -3,16 +3,13 @@ main = "src/index.ts"
 compatibility_date = "2025-10-01"
 compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
 
-# Bind static assets
 [assets]
 binding = "ASSETS"
 directory = "./public"
 
-# Observability
 [observability]
 enabled = true
 
-# AI Bindings
 [ai]
 binding = "AI"
 
@@ -21,12 +18,10 @@ binding = "HF_GPT2"
 model = "pick-of-gods/huggingface/gpt2"
 max_tokens = 2048
 
-# D1 Database
 [[d1_databases]]
 binding = "DB"
 database_name = "elderscape-d1"
 
-# KV Namespace
 [[kv_namespaces]]
 binding = "AI_MEMORY"
 id = "45b66378f5774ce78787331834db0496"
