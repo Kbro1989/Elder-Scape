@@ -1,11 +1,20 @@
-export interface Env {
-  HF_API_TOKEN: string;  // Wrangler injects this securely
-  AI_MEMORY: KVNamespace;
-  DB: D1Database;
-  ASSETS: R2Bucket;
-}
+import { Env } from "./env";
+import { handleChat } from "./routes/chat";
+import { handleModelViewer } from "./routes/modelviewer";
 
-const hf = new HfInferenceEndpoint(
-  "https://gateway.ai.cloudflare.com/v1/6872653edcee9c791787c1b783173793/pick-of-gods/huggingface/gpt2",
-  env.HF_API_TOKEN
-);
+export default {
+  async fetch(req: Request, env: Env, ctx: ExecutionContext) {
+    const url = new URL(req.url);
+
+    if (url.pathname.startsWith("/api/chat")) {
+      return handleChat(req, env);
+    }
+
+    if (url.pathname.startsWith("/modelviewer")) {
+      return handleModelViewer(req, env);
+    }
+
+    // Serve static assets
+    return env.ASSETS.fetch(req);
+  }
+};
