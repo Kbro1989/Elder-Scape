@@ -1,56 +1,42 @@
-import { Env } from "./env";
-import { handleChat } from "./routes/chat";
-import { handleModelViewer } from "./routes/modelviewer";
+import { HfInferenceEndpoint } from '@huggingface/inference';
+
+export interface Env {
+  AI: any;
+  HF_GPT2: any;
+  DB: D1Database;
+  AI_MEMORY: KVNamespace;
+  ASSETS: Fetcher;
+  HF_API_TOKEN: string;
+}
 
 export default {
-  async fetch(req: Request, env: Env, ctx: ExecutionContext) {
-    const url = new URL(req.url);
-
-    if (url.pathname.startsWith("/api/chat")) {
-      return handleChat(req, env);
-    }
-
-    if (url.pathname.startsWith("/modelviewer")) {
-      return handleModelViewer(req, env);import { HfInferenceEndpoint } from '@huggingface/inference';
-import { handleRequest } from './routes/modelviewer';
-import { handlePlayer } from './routes/player';
-import { handleChat } from './routes/chat';
-
-export default {
-  async fetch(request: Request, env: any) {
+  async fetch(request: Request, env: Env) {
     const url = new URL(request.url);
 
-    // AI Gateway (HuggingFace)
-    const hf = new HfInferenceEndpoint(
-      "https://gateway.ai.cloudflare.com/v1/6872653edcee9c791787c1b783173793/pick-of-gods/huggingface/gpt2",
-      env.HF_API_TOKEN
-    );
-
-    // Routes
-    if (url.pathname.startsWith("/modelviewer")) {
-      return handleRequest(request, env);
-    }
-
-    if (url.pathname.startsWith("/player")) {
-      return handlePlayer(request, env);
-    }
-
-    if (url.pathname.startsWith("/chat")) {
-      return handleChat(request, env, hf);
-    }
-
-    // Static assets
-    try {
-      return await env.ASSETS.fetch(request);
-    } catch {
-      return new Response("Not found", { status: 404 });
-    }
-  },
-};
-
-    }
-
     // Serve static assets
-    return env.ASSETS.fetch(req);
-  }
+    if (url.pathname.startsWith("/public/") || url.pathname === "/webviewer.js") {
+      return env.ASSETS.fetch(request);
+    }
+
+    // AI chat endpoint
+    if (url.pathname === "/api/chat") {
+      const { message } = await request.json();
+      const hf = new HfInferenceEndpoint(
+        "https://gateway.ai.cloudflare.com/v1/6872653edcee9c791787c1b783173793/pick-of-gods/huggingface/gpt2",
+        env.HF_API_TOKEN
+      );
+      const reply = await hf.text({ inputs: message });
+      return new Response(JSON.stringify({ reply }), { headers: { "Content-Type": "application/json" } });
+    }
+
+    // Other API routes
+    if (url.pathname.startsWith("/api/player")) {
+      const name = url.pathname.split("/").pop();
+      const res = await env.DB.prepare("SELECT * FROM players WHERE username = ?").bind(name).all();
+      return new Response(JSON.stringify(res.results), { headers: { "Content-Type": "application/json" } });
+    }
+
+    // Default: serve index.html
+    return env.ASSETS.fetch(new Request("/public/index.html"));
+  },
 };
