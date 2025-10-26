@@ -1,30 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ElderScape</title>
-<link rel="stylesheet" href="/index.css">
-<script defer src="/webviewer.js"></script>
-<script defer src="/chat.js"></script>
-<script defer src="/player.js"></script>
+  <meta charset="UTF-8">
+  <title>ElderScape Model Viewer</title>
+  <script defer src="/webviewer.js"></script>
+  <link rel="stylesheet" href="/styles/main.css">
 </head>
 <body>
-<div id="navbar">
-  <img src="/assets/logo.png" alt="ElderScape" id="logo">
-  <input type="text" id="playerInput" placeholder="Enter username">
-  <button id="lookupBtn">Lookup Player</button>
-</div>
-
-<div id="main">
   <div id="rsmv_app"></div>
+  <script>
+    // Initialize webviewer
+    if (window.RSMV) {
+      const root = RSMV.start(document.getElementById("rsmv_app"));
+    }
 
-  <div id="chatbox">
-    <div id="chatHistory"></div>
-    <textarea id="chatInput" placeholder="Type your message..."></textarea>
-    <button id="sendBtn">Send</button>
-  </div>
-</div>
+    // Example AI chat call
+    async function sendMessage(msg) {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg })
+      });
+      const data = await res.json();
+      console.log("AI reply:", data.reply);
+    }
 
+    sendMessage("Hello ElderScape AI!");
+  </script>
 </body>
 </html>
