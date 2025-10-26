@@ -1,12 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Elder-Scape Model Viewer</title>
-  <link rel="stylesheet" href="/index.css">
-  <script defer src="/webviewer.js"></script>
-</head>
-<body>
-  <div id="rsmv_app"></div>
-</body>
-</html>
+// Ensure your existing RSMV start/unload functions remain
+var RSMV = (function () {
+  let root;
+
+  return {
+    start: function (container) {
+      root = document.createElement('div');
+      root.id = "viewer-root";
+      root.style.width = "100%";
+      root.style.height = "100%";
+      root.style.background = "#111";
+      container.appendChild(root);
+
+      // Initialize Three.js or your existing RuneScape model loader
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, container.clientWidth/container.clientHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      root.appendChild(renderer.domElement);
+
+      // Lighting
+      const light = new THREE.DirectionalLight(0xffffff, 1);
+      light.position.set(5,10,7.5);
+      scene.add(light);
+
+      // Placeholder avatar
+      const geometry = new THREE.BoxGeometry(1,2,1);
+      const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+      const avatar = new THREE.Mesh(geometry, material);
+      scene.add(avatar);
+
+      camera.position.z = 5;
+
+      // Orbit Controls
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // Return root + scene objects for customizer functions
+      return { container: root, scene, camera, renderer, avatar, controls };
+    },
+
+    unload: function (rootObj) {
+      if (!rootObj) return;
+      rootObj.container.remove();
+    },
+
+    // Avatar customization API
+    setAvatarColor: function(rootObj, colorHex) {
+      if(rootObj.avatar) rootObj.avatar.material.color.set(colorHex);
+    },
+
+    setAvatarGeometry: function(rootObj, geomType) {
+      let geom;
+      switch(geomType) {
+        case 'slim': geom = new THREE.BoxGeometry(0.8,2,0.8); break;
+        case 'bulky': geom = new THREE.BoxGeometry(1.2,2.2,1.2); break;
+        default: geom = new THREE.BoxGeometry(1,2,1);
+      }
+      rootObj.avatar.geometry.dispose();
+      rootObj.avatar.geometry = geom;
+    }
+  }
+})();
