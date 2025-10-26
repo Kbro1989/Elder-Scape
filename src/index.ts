@@ -1,4 +1,4 @@
-import { HfInferenceEndpoint } from '@huggingface/inference';
+import { createAIClient, chatAI } from "./ai";
 
 export interface Env {
   AI: any;
@@ -14,25 +14,25 @@ export default {
     const url = new URL(request.url);
 
     // Serve static assets
-    if (url.pathname.startsWith("/public/") || url.pathname === "/webviewer.js") {
+    if (url.pathname.startsWith("/public/") || url.pathname.endsWith(".js") || url.pathname.endsWith(".css")) {
       return env.ASSETS.fetch(request);
     }
 
-    // AI chat endpoint
+    // AI chat
     if (url.pathname === "/api/chat") {
       const { message } = await request.json();
-      const hf = new HfInferenceEndpoint(
-        "https://gateway.ai.cloudflare.com/v1/6872653edcee9c791787c1b783173793/pick-of-gods/huggingface/gpt2",
-        env.HF_API_TOKEN
-      );
-      const reply = await hf.text({ inputs: message });
+      const hf = createAIClient(env.HF_API_TOKEN);
+      const reply = await chatAI(hf, message);
       return new Response(JSON.stringify({ reply }), { headers: { "Content-Type": "application/json" } });
     }
 
-    // Other API routes
+    // Player endpoints
     if (url.pathname.startsWith("/api/player")) {
-      const name = url.pathname.split("/").pop();
-      const res = await env.DB.prepare("SELECT * FROM players WHERE username = ?").bind(name).all();
+      const parts = url.pathname.split("/");
+      const username = parts[3]; // /api/player/:username
+      const res = await env.DB.prepare("SELECT * FROM players WHERE username = ?")
+        .bind(username)
+        .all();
       return new Response(JSON.stringify(res.results), { headers: { "Content-Type": "application/json" } });
     }
 
