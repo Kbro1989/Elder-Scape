@@ -1,4 +1,4 @@
-import { HfInferenceEndpoint } from '@huggingface/inference';
+import { HfInferenceEndpoint } from "@huggingface/inference";
 
 export function createAIClient(token: string) {
   return new HfInferenceEndpoint(
